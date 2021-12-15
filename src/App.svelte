@@ -2,29 +2,41 @@
 	import ModeSwitcher from './ModeSwitcher.svelte';
 	import Tailwindcss from './Tailwindcss.svelte';
 	import { draggable } from "svelte-drag"
-	import Modal from 'svelte-simple-modal';
+
+	interface Position {
+		x: number,
+		y: number
+	}
 
 	interface Element {
 		imageURL?: string,
-		content?: string
+		content?: string,
+		editable?: boolean,
+		position?: Position
 	}
 
-	let elements: Element[] = [
-		{
-			content: "Hello World"
-		},
-		{
-			content: "Testing 1-2-3"
-		}
-	]
+	let elements: Element[] = [{
+		content: "My conspiracy note"
+	}]
+
+	function toggleEditable(index: number) {
+		elements = [
+			...elements.slice(0, index),
+			Object.assign({}, elements[index], { editable: true }),
+			...elements.slice(index + 1, elements.length)
+		]
+	}
 </script>
-<Modal>
-	<Tailwindcss />
-	<ModeSwitcher />
-	<button class="px-4 py-2 justify-center w-full shadow-sm bg-blue-200 dark:bg-blue-900 fixed top-0">Add</button>
-	{#each elements as element}
-		<div use:draggable class="w-24 z-0 p-6 shadow-md bg-white dark:bg-black">
-			<span class="text-black dark:text-white">{element.content}</span>
+<Tailwindcss />
+<ModeSwitcher />
+<div class="h-full w-full" on:click|self={() => alert(1)}>
+	{#each elements as element, i}
+		<div on:dblclick={() => toggleEditable(i)} use:draggable class="max-w-md z-0 p-6 shadow-md bg-white dark:bg-black">
+			{#if element.editable}
+				<textarea class="resizenone" bind:value={element.content} placeholder="Enter notes content..." />
+			{:else}
+				<span class="text-black dark:text-white">{element.content}</span>
+			{/if}
 		</div>
 	{/each}
-</Modal>
+</div>
