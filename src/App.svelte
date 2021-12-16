@@ -12,31 +12,48 @@
 		imageURL?: string,
 		content?: string,
 		editable?: boolean,
-		position?: Position
+		position?: Position,
+		textarea?: HTMLTextAreaElement
 	}
 
-	let elements: Element[] = [{
-		content: "My conspiracy note"
-	}]
-
-	function toggleEditable(index: number) {
-		elements = [
-			...elements.slice(0, index),
-			Object.assign({}, elements[index], { editable: !elements[index].editable }),
-			...elements.slice(index + 1, elements.length)
-		]
+	function addElement(event: MouseEvent) {
+		elements = [...elements, {
+			position: {
+				x: event.offsetX,
+				y: event.offsetY
+			},
+			content: "My conspiracy note"
+		}]
 	}
+
+	let elements: Element[] = []
 </script>
 <Tailwindcss />
 <ModeSwitcher />
-<div class="h-full w-full" on:click|self={() => alert(1)}>
-	{#each elements as element, i}
-		<div on:dblclick={() => toggleEditable(i)} use:draggable={{axis: "both", bounds: "body"}} class="max-w-md z-0 p-6 shadow-md bg-white dark:bg-black">
+<div class="h-full w-full" on:dblclick|self={addElement}>
+	{#each elements as element}
+		<div 
+			on:dblclick={() => element.editable = !element.editable}
+			use:draggable={{axis: "both", bounds: "body", position: element.position, defaultClassDragging: "box-dragging"}}
+			class="transition-shadow fixed max-w-md z-0 p-6 shadow-md bg-white dark:bg-black"
+		>
 			{#if element.editable}
-				<textarea class="resizenone" on:blur={() => toggleEditable(i)} bind:value={element.content} placeholder="Enter notes content..." />
+				<textarea
+					bind:this={element.textarea}
+					class="resizenone dark:bg-black bg-white"
+					on:blur={() => element.editable = false}
+					bind:value={element.content}
+					placeholder="Enter notes content..." 
+				/>
 			{:else}
-				<span class="text-black dark:text-white">{element.content}</span>
+				<span>{element.content || ""}</span>
 			{/if}
 		</div>
 	{/each}
 </div>
+
+<style>
+	:global(.box-dragging) {
+		@apply shadow-lg scale-50;
+	}
+</style>
