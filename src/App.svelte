@@ -22,7 +22,7 @@
 	function toggleEditable(index: number) {
 		elements = [
 			...elements.slice(0, index),
-			Object.assign({}, elements[index], { editable: true }),
+			Object.assign({}, elements[index], { editable: !elements[index].editable }),
 			...elements.slice(index + 1, elements.length)
 		]
 	}
@@ -31,9 +31,9 @@
 <ModeSwitcher />
 <div class="h-full w-full" on:click|self={() => alert(1)}>
 	{#each elements as element, i}
-		<div on:dblclick={() => toggleEditable(i)} use:draggable class="max-w-md z-0 p-6 shadow-md bg-white dark:bg-black">
+		<div on:dblclick={() => toggleEditable(i)} use:draggable={{axis: "both", bounds: "body"}} class="max-w-md z-0 p-6 shadow-md bg-white dark:bg-black">
 			{#if element.editable}
-				<textarea class="resizenone" bind:value={element.content} placeholder="Enter notes content..." />
+				<textarea class="resizenone" on:blur={() => toggleEditable(i)} bind:value={element.content} placeholder="Enter notes content..." />
 			{:else}
 				<span class="text-black dark:text-white">{element.content}</span>
 			{/if}
