@@ -19,8 +19,8 @@
 	function addElement(event: MouseEvent) {
 		elements = [...elements, {
 			position: {
-				x: event.offsetX,
-				y: event.offsetY
+				x: event.pageX,
+				y: event.pageY
 			},
 			content: "My conspiracy note"
 		}]
@@ -28,19 +28,19 @@
 
 	let elements: Element[] = []
 </script>
-<Tailwindcss />
+	<Tailwindcss />
 <ModeSwitcher />
-<div class="h-full w-full" on:dblclick|self={addElement}>
+<div id="container" class="h-full w-full" on:dblclick|self={addElement}>
 	{#each elements as element}
 		<div 
 			on:dblclick={() => element.editable = !element.editable}
-			use:draggable={{axis: "both", bounds: "body", position: element.position, defaultClassDragging: "box-dragging"}}
-			class="transition-shadow fixed max-w-md z-0 p-6 shadow-md bg-white dark:bg-black"
+			use:draggable={{axis: "both", bounds: "#container", position: element.position, defaultClassDragging: "box-dragging"}}
+			class="transition-shadow fixed max-w-md z-0 p-6 shadow-lg rounded-md bg-gray-50 dark:bg-black"
 		>
 			{#if element.editable}
 				<textarea
 					bind:this={element.textarea}
-					class="resizenone dark:bg-black bg-white"
+					class="resize-none dark:bg-black bg-white"
 					on:blur={() => element.editable = false}
 					bind:value={element.content}
 					placeholder="Enter notes content..." 
@@ -54,6 +54,6 @@
 
 <style>
 	:global(.box-dragging) {
-		@apply shadow-lg scale-50;
+		@apply shadow-xl;
 	}
 </style>
