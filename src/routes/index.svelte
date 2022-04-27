@@ -1,7 +1,5 @@
 <script lang="ts">
-	import ModeSwitcher from './ModeSwitcher.svelte';
-	import Tailwindcss from './Tailwindcss.svelte';
-	import { draggable } from "svelte-drag"
+	import { draggable } from "@neodrag/svelte"
 
 	interface Position {
 		x: number,
@@ -28,13 +26,15 @@
 
 	let elements: Element[] = []
 </script>
-	<Tailwindcss />
-<ModeSwitcher />
-<div id="container" class="h-full w-full" on:dblclick|self={addElement}>
+<div id="container" class="fixed h-screen w-screen" on:dblclick|self={addElement}>
 	{#each elements as element}
 		<div 
 			on:dblclick={() => element.editable = !element.editable}
 			use:draggable={{axis: "both", bounds: "#container", position: element.position, defaultClassDragging: "box-dragging"}}
+      on:neodrag:end={({ offsetX, offsetY }) => {
+        element.position.x += offsetX;
+        element.position.y += offsetY;
+      }}
 			class="transition-shadow fixed max-w-md z-0 p-6 shadow-lg rounded-md bg-gray-50 dark:bg-black"
 		>
 			{#if element.editable}
