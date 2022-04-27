@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { draggable } from "@neodrag/svelte"
+  import { tick } from "svelte"
 
 	interface Position {
 		x: number,
@@ -11,6 +12,7 @@
 		content?: string,
 		editable?: boolean,
 		position?: Position,
+    selected?: boolean
 		textarea?: HTMLTextAreaElement
 	}
 
@@ -29,16 +31,25 @@
 <div id="container" class="fixed h-screen w-screen" on:dblclick|self={addElement}>
 	{#each elements as element}
 		<div 
-			on:dblclick={() => element.editable = !element.editable}
+			on:dblclick={() => {
+        element.editable = !element.editable;
+        tick().then(() => element.textarea?.focus())
+      }}
+      on:click={() => element.selected = !element.selected}
 			use:draggable={{axis: "both", bounds: "#container", position: element.position, defaultClassDragging: "box-dragging"}}
       on:neodrag:end={({ offsetX, offsetY }) => {
         element.position.x += offsetX;
         element.position.y += offsetY;
       }}
-			class="transition-shadow fixed max-w-md z-0 p-6 shadow-lg rounded-md bg-gray-50 dark:bg-black"
+			class="transition-shadow fixed max-w-md z-0 p-6 shadow-lg rounded-md {element.selected ? "bg-gray-100" : "bg-gray-50"} dark:bg-black"
 		>
 			{#if element.editable}
 				<textarea
+          on:keydown={event => {
+            if (event.key == "Escape" || event.key == "Esc") {
+              element.editable = false
+            }
+          }}
 					bind:this={element.textarea}
 					class="resize-none dark:bg-black bg-white"
 					on:blur={() => element.editable = false}
