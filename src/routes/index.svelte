@@ -29,6 +29,30 @@
 		textarea?: HTMLTextAreaElement;
 	}
 
+  let elements: Element[] = []
+
+  interface SerializableElement {
+    imageURL: string | undefined;
+    content: string;
+    id: string;
+    position: Position;
+    connections: string[];
+  }
+
+  function elementToSerializableElement({ imageURL, content, id, position, connections }: Element): SerializableElement {
+    return {
+      imageURL,
+      content,
+      id,
+      position,
+      connections
+    }
+  }
+
+  function elementsAsSerializableElements(elements: Element[]): SerializableElement[] {
+    return elements.map(elementToSerializableElement)
+  }
+
 	function addElement(event: MouseEvent) {
 		elements = [...elements, {
 			position: {
@@ -40,8 +64,6 @@
 			content: "My conspiracy note"
 		}]
 	}
-
-  let elements: Element[] = []
 
   $: if (width && height && elements.length > 0 && canvas && canvas.getContext("2d")) {
     const context = canvas.getContext("2d")!
@@ -144,4 +166,8 @@ on:dblclick|self={addElement}
 		@apply shadow-xl;
 	}
 </style>
-<canvas class="fixed z-10 top-0 left-0 pointer-events-none" bind:this={canvas} {width} {height}/>
+<canvas class="fixed top-0 left-0 pointer-events-none" bind:this={canvas} {width} {height}/>
+<div class="fixed top-0 left-0 w-screen p-4 bg-white shadow-lg">
+  <button on:click={() => alert(JSON.stringify(elementsAsSerializableElements(elements)))} class="bg-cyan-200 px-4 py-2 rounded-lg mx-2">Save</button>
+  <button class="bg-cyan-200 px-4 py-2 rounded-lg mx-2">Load</button>
+</div>
