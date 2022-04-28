@@ -43,25 +43,32 @@
 
   let elements: Element[] = []
 
-  $: if (elements.length > 0 && canvas && canvas.getContext("2d")) {
+  $: if (width && height && elements.length > 0 && canvas && canvas.getContext("2d")) {
     const context = canvas.getContext("2d")!
-    context.strokeStyle = "rgba(235, 64, 52, 0.3)"
-    context.lineWidth = 4
     context.clearRect(0, 0, width, height);
     elements.forEach(it => it.connections.forEach(connection => {
       const elementSelection = elements.filter(it => it.id == connection)
       if (elementSelection.length === 0) return
       const element = elementSelection[0]
+      context.strokeStyle = "rgba(235, 64, 52, 0.3)"
+      context.lineWidth = 4
       context.beginPath()
-      context.moveTo(
-        it.position.x + (it.self?.clientWidth || 0) / 2,
-        it.position.y + (it.self?.clientHeight || 0) / 8
-      )
-      context.lineTo(
-        element.position.x + (element.self?.clientWidth || 0) / 2,
-        element.position.y + (element.self?.clientHeight || 0) / 8
-      )
+      const itX = it.position.x + (it.self?.clientWidth || 0) / 2
+      const itY = it.position.y + (it.self?.clientHeight || 0) / 8
+      const elementX = element.position.x + (element.self?.clientWidth || 0) / 2
+      const elementY = element.position.y + (element.self?.clientHeight || 0) / 8
+      context.moveTo(itX, itY)
+      context.lineTo(elementX, elementY)
       context.stroke()
+
+      context.strokeStyle = "rgba(0, 0, 0, 0)"
+      context.fillStyle = "#ebde34"
+      context.beginPath();
+      context.arc(itX, itY, 7, 0, 2 * Math.PI);
+      context.fill();
+      context.beginPath();
+      context.arc(elementX, elementY, 7, 0, 2 * Math.PI);
+      context.fill();
     }))
   }
 
@@ -71,7 +78,7 @@
   height = window.innerHeight
 }}></svelte:window>
 <div id="container" 
-class="fixed top-0 left-0 h-screen w-screen bg-gray-300" 
+class="fixed top-0 left-0 h-full w-screen bg-gray-300" 
 on:click|self={() => {
   elements = elements.map(it => {
     it.selected = false;
@@ -90,6 +97,7 @@ on:dblclick|self={addElement}
       on:click={() => {
         const otherSelectedElement = elements.filter(it => it !== element).filter(it => it.selected);
         if (otherSelectedElement.length !== 0) {
+          if (otherSelectedElement[0].connections.some(elem => elem == element.id)) return
           elements[elements.indexOf(otherSelectedElement[0])].selected = false
           element.connections = [...element.connections, otherSelectedElement[0].id]
           elements = elements
@@ -105,6 +113,9 @@ on:dblclick|self={addElement}
         element.position.x = offsetX;
         element.position.y = offsetY;
       }}
+      on:neodrag:end={() => tick().then(() => {
+        element.selected = false
+      })}
 			class="transition-shadow fixed max-w-md z-0 p-6 shadow-lg rounded-md
       {element.selected ? "bg-gray-200" : "bg-white"} dark:bg-black"
 		>
