@@ -1,13 +1,11 @@
 <script lang="ts">
 	import { draggable } from "@neodrag/svelte"
   import { onMount, tick } from "svelte"
-  import { fly } from "svelte/transition"
-  import { type Element, elementsAsSerializableElements } from "$lib/elements"
+  import TopBar from "$lib/TopBar.svelte"
+  import { elements } from "$lib/elements"
 
-  let elements: Element[] = []
   let width: number;
   let height: number;
-  let topBarVisible = true;
   let canvas: HTMLCanvasElement | null = null;
 
   onMount(() => {
@@ -16,7 +14,7 @@
   })
 
 	function addElement(event: MouseEvent) {
-		elements = [...elements, {
+		$elements = [...$elements, {
 			position: {
 				x: event.pageX,
 				y: event.pageY
@@ -27,11 +25,11 @@
 		}]
 	}
 
-  $: if (width && height && elements.length > 0 && canvas && canvas.getContext("2d")) {
+  $: if (width && height && $elements.length > 0 && canvas && canvas.getContext("2d")) {
     const context = canvas.getContext("2d")!
     context.clearRect(0, 0, width, height);
-    elements.forEach(it => it.connections.forEach(connection => {
-      const elementSelection = elements.filter(it => it.id == connection)
+    $elements.forEach(it => it.connections.forEach(connection => {
+      const elementSelection = $elements.filter(it => it.id == connection)
       if (elementSelection.length === 0) return
       const element = elementSelection[0]
       context.strokeStyle = "rgba(235, 64, 52, 0.3)"
@@ -64,14 +62,14 @@
 <div id="container" 
 class="fixed top-0 left-0 h-full w-screen bg-gray-300" 
 on:click|self={() => {
-  elements = elements.map(it => {
+  $elements = $elements.map(it => {
     it.selected = false;
     return it;
   })
 }}
 on:dblclick|self={addElement}
 >
-	{#each elements as element}
+	{#each $elements as element}
 		<div
       bind:this={element.self} 
 			on:dblclick={() => {
@@ -79,12 +77,12 @@ on:dblclick|self={addElement}
         tick().then(() => element.textarea?.focus())
       }}
       on:click={() => {
-        const otherSelectedElement = elements.filter(it => it !== element).filter(it => it.selected);
+        const otherSelectedElement = $elements.filter(it => it !== element).filter(it => it.selected);
         if (otherSelectedElement.length !== 0) {
           if (otherSelectedElement[0].connections.some(elem => elem == element.id)) return
-          elements[elements.indexOf(otherSelectedElement[0])].selected = false
+          $elements[$elements.indexOf(otherSelectedElement[0])].selected = false
           element.connections = [...element.connections, otherSelectedElement[0].id]
-          elements = elements
+          $elements = $elements
           return
         }
 
@@ -129,10 +127,4 @@ on:dblclick|self={addElement}
 	}
 </style>
 <canvas class="fixed top-0 left-0 pointer-events-none" bind:this={canvas} {width} {height}/>
-{#if topBarVisible}
-  <div transition:fly={{ y: -150 }} class="fixed top-0 left-0 w-screen p-4 bg-white shadow-lg">
-    <button on:click={() => alert(JSON.stringify(elementsAsSerializableElements(elements)))} class="bg-cyan-200 px-4 py-2 rounded-lg mx-2">Save</button>
-    <button class="bg-cyan-200 px-4 py-2 rounded-lg mx-2">Load</button>
-    <button on:click={() => topBarVisible = false }>Hide</button>
-  </div>
-{/if}
+<TopBar></TopBar>

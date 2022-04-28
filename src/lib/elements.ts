@@ -1,3 +1,5 @@
+import { writable } from "svelte/store"
+
 interface Position {
   x: number,
   y: number
@@ -37,3 +39,5 @@ function elementToSerializableElement({ imageURL, content, id, position, connect
 export function elementsAsSerializableElements(elements: Element[]): SerializableElement[] {
   return elements.map(elementToSerializableElement)
 }
+
+export const elements = writable<Element[]>([])
