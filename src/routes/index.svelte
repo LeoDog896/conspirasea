@@ -1,57 +1,19 @@
 <script lang="ts">
 	import { draggable } from "@neodrag/svelte"
   import { onMount, tick } from "svelte"
+  import { fly } from "svelte/transition"
+  import { type Element, elementsAsSerializableElements } from "$lib/elements"
 
+  let elements: Element[] = []
   let width: number;
   let height: number;
+  let topBarVisible = true;
   let canvas: HTMLCanvasElement | null = null;
 
   onMount(() => {
     width = window.innerWidth
     height = window.innerHeight
   })
-
-	interface Position {
-		x: number,
-		y: number
-	}
-
-	interface Element {
-		imageURL?: string;
-		content: string;
-    id: string;
-		editable?: boolean;
-		position: Position;
-    /** An array of other nodes they're connected to. */
-    connections: string[];
-    selected?: boolean;
-    self?: HTMLElement;
-		textarea?: HTMLTextAreaElement;
-	}
-
-  let elements: Element[] = []
-
-  interface SerializableElement {
-    imageURL: string | undefined;
-    content: string;
-    id: string;
-    position: Position;
-    connections: string[];
-  }
-
-  function elementToSerializableElement({ imageURL, content, id, position, connections }: Element): SerializableElement {
-    return {
-      imageURL,
-      content,
-      id,
-      position,
-      connections
-    }
-  }
-
-  function elementsAsSerializableElements(elements: Element[]): SerializableElement[] {
-    return elements.map(elementToSerializableElement)
-  }
 
 	function addElement(event: MouseEvent) {
 		elements = [...elements, {
@@ -167,7 +129,10 @@ on:dblclick|self={addElement}
 	}
 </style>
 <canvas class="fixed top-0 left-0 pointer-events-none" bind:this={canvas} {width} {height}/>
-<div class="fixed top-0 left-0 w-screen p-4 bg-white shadow-lg">
-  <button on:click={() => alert(JSON.stringify(elementsAsSerializableElements(elements)))} class="bg-cyan-200 px-4 py-2 rounded-lg mx-2">Save</button>
-  <button class="bg-cyan-200 px-4 py-2 rounded-lg mx-2">Load</button>
-</div>
+{#if topBarVisible}
+  <div transition:fly={{ y: -150 }} class="fixed top-0 left-0 w-screen p-4 bg-white shadow-lg">
+    <button on:click={() => alert(JSON.stringify(elementsAsSerializableElements(elements)))} class="bg-cyan-200 px-4 py-2 rounded-lg mx-2">Save</button>
+    <button class="bg-cyan-200 px-4 py-2 rounded-lg mx-2">Load</button>
+    <button on:click={() => topBarVisible = false }>Hide</button>
+  </div>
+{/if}
