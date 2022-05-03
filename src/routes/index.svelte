@@ -64,7 +64,7 @@
 <svelte:window on:resize={() => {
   width = window.innerWidth;
   height = window.innerHeight;
-  draw()
+  tick().then(draw)
 }}></svelte:window>
 <div id="container" 
 class="fixed top-0 left-0 h-full w-screen bg-gray-300" 

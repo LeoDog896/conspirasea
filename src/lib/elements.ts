@@ -1,4 +1,4 @@
-import { writable, derived, get } from "svelte/store"
+import { writable, get } from "svelte/store"
 import writableDerived from "svelte-writable-derived";
 
 interface Position {
@@ -7,15 +7,23 @@ interface Position {
 }
 
 export interface Element {
+  /** The image URL. Optional */
   imageURL?: string;
+  /** The content of the element */
   content: string;
+  /** The ID of the element. Generated via crypto's UUID method */
   id: string;
+  /** If the element is currently editable. One at a time */
   editable?: boolean;
+  /** The position of the element on the screen. */
   position: Position;
-  /** An array of other nodes they're connected to. */
+  /** An array of other nodes they're connected to with the ID property */
   connections: string[];
+  /** If the element is currently selected. Not used for serialization */
   selected?: boolean;
+  /** A reference to the self's element */
   self?: HTMLElement;
+  /** A reference to the text area inside the element. Used for ".focus" */
   textarea?: HTMLTextAreaElement;
 }
 
@@ -44,6 +52,7 @@ export function elementsAsSerializableElements(elements: Element[]): Serializabl
 interface Conspirasea {
   name: string;
   elements: Element[];
+  editable?: boolean;
 }
 
 export const conspiraseas = writable<Conspirasea[]>([{
