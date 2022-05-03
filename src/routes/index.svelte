@@ -2,7 +2,7 @@
 	import { draggable } from "@neodrag/svelte"
   import { onMount, tick } from "svelte"
   import TopBar from "$lib/TopBar.svelte"
-  import { elements } from "$lib/elements"
+  import { currentConspirasea } from "$lib/elements"
 
   let width: number;
   let height: number;
@@ -14,7 +14,7 @@
   })
 
 	function addElement(event: MouseEvent) {
-		$elements = [...$elements, {
+		$currentConspirasea.elements = [...$currentConspirasea.elements, {
 			position: {
 				x: event.pageX,
 				y: event.pageY
@@ -25,11 +25,13 @@
 		}]
 	}
 
-  $: if (width && height && $elements.length > 0 && canvas && canvas.getContext("2d")) {
+  function draw() {
+    if (!canvas || !canvas.getContext("2d")) return
+
     const context = canvas.getContext("2d")!
     context.clearRect(0, 0, width, height);
-    $elements.forEach(it => it.connections.forEach(connection => {
-      const elementSelection = $elements.filter(it => it.id == connection)
+    $currentConspirasea.elements.forEach(it => it.connections.forEach(connection => {
+      const elementSelection = $currentConspirasea.elements.filter(it => it.id == connection)
       if (elementSelection.length === 0) return
       const element = elementSelection[0]
       context.strokeStyle = "rgba(235, 64, 52, 0.3)"
@@ -54,22 +56,27 @@
     }))
   }
 
+  $: if (width && height && $currentConspirasea.elements.length > 0 && canvas && canvas.getContext("2d")) {
+    draw()
+  }
+
 </script>
 <svelte:window on:resize={() => {
-  width = window.innerWidth
-  height = window.innerHeight
+  width = window.innerWidth;
+  height = window.innerHeight;
+  draw()
 }}></svelte:window>
 <div id="container" 
 class="fixed top-0 left-0 h-full w-screen bg-gray-300" 
 on:click|self={() => {
-  $elements = $elements.map(it => {
+  $currentConspirasea.elements = $currentConspirasea.elements.map(it => {
     it.selected = false;
     return it;
   })
 }}
 on:dblclick|self={addElement}
 >
-	{#each $elements as element}
+	{#each $currentConspirasea.elements as element}
 		<div
       bind:this={element.self} 
 			on:dblclick={() => {
@@ -77,12 +84,12 @@ on:dblclick|self={addElement}
         tick().then(() => element.textarea?.focus())
       }}
       on:click={() => {
-        const otherSelectedElement = $elements.filter(it => it !== element).filter(it => it.selected);
+        const otherSelectedElement = $currentConspirasea.elements.filter(it => it !== element).filter(it => it.selected);
         if (otherSelectedElement.length !== 0) {
-          if (otherSelectedElement[0].connections.some(elem => elem == element.id)) return
-          $elements[$elements.indexOf(otherSelectedElement[0])].selected = false
-          element.connections = [...element.connections, otherSelectedElement[0].id]
-          $elements = $elements
+          if (otherSelectedElement[0].connections.some(elem => elem == element.id)) return;
+          $currentConspirasea.elements[$currentConspirasea.elements.indexOf(otherSelectedElement[0])].selected = false;
+          element.connections = [...element.connections, otherSelectedElement[0].id];
+          $currentConspirasea.elements = $currentConspirasea.elements
           return
         }
 
