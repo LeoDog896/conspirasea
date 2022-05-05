@@ -2,7 +2,7 @@
 	import { draggable } from "@neodrag/svelte"
   import { onMount, tick } from "svelte"
   import TopBar from "$lib/TopBar.svelte"
-  import { currentConspirasea } from "$lib/elements"
+  import { currentConspirasea, conspiraseas } from "$lib/elements"
 
   let width: number;
   let height: number;
@@ -56,7 +56,7 @@
     }))
   }
 
-  $: if (width && height && $currentConspirasea.elements.length > 0 && canvas && canvas.getContext("2d")) {
+  $: if (width && height && $conspiraseas && $currentConspirasea.elements.length > 0 && canvas && canvas.getContext("2d")) {
     draw()
   }
 

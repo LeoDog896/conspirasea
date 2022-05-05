@@ -1,7 +1,22 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { fly, fade } from "svelte/transition"
-  import { conspiraseas, conspiraseaIndex, currentConspirasea } from "./elements"
+  import { conspiraseas, serializableConspiraseas, conspiraseaIndex, currentConspirasea, type SerializableConspirasea } from "./elements"
   
+  let dataLoaded = false
+
+  onMount(() => {
+    const data = localStorage.getItem("data")
+    if (!data) return
+    const jsonData = JSON.parse(data) as SerializableConspirasea[]
+    $conspiraseas = jsonData
+    dataLoaded = true
+  })
+
+  $: if ($conspiraseas && globalThis.localStorage && (dataLoaded || localStorage.getItem("data") == null)) {
+    localStorage.setItem("data", JSON.stringify($serializableConspiraseas))
+  }
+
   export let visible: boolean;
 </script>
 

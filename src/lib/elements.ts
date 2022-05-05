@@ -1,4 +1,4 @@
-import { writable, get } from "svelte/store"
+import { writable, get, derived } from "svelte/store"
 import writableDerived from "svelte-writable-derived";
 
 interface Position {
@@ -27,14 +27,14 @@ export interface Element {
   textarea?: HTMLTextAreaElement;
 }
 
-export interface SerializableElement {
-  imageURL: string | undefined;
-  content: string;
-  id: string;
-  position: Position;
-  connections: string[];
+export interface Conspirasea {
+  name: string;
+  elements: Element[];
+  editable?: boolean;
 }
 
+export type SerializableConspirasea = Omit<Conspirasea, "editable" | "elements"> & { elements: SerializableElement[] }
+export type SerializableElement = Omit<Element, "editable" | "self" | "textarea" | "selected">
 function elementToSerializableElement({ imageURL, content, id, position, connections }: Element): SerializableElement {
   return {
     imageURL,
@@ -45,20 +45,17 @@ function elementToSerializableElement({ imageURL, content, id, position, connect
   }
 }
 
-export function elementsAsSerializableElements(elements: Element[]): SerializableElement[] {
-  return elements.map(elementToSerializableElement)
-}
-
-interface Conspirasea {
-  name: string;
-  elements: Element[];
-  editable?: boolean;
+function conspiraseaToSerializableConspirasea({ name, elements }: Conspirasea): SerializableConspirasea {
+  return { name, elements: elements.map(elementToSerializableElement) }
 }
 
 export const conspiraseas = writable<Conspirasea[]>([{
   name: "Conspirasea",
   elements: []
 }])
+
+export const serializableConspiraseas = derived(conspiraseas, $conspiraseas => $conspiraseas.map(conspiraseaToSerializableConspirasea))
+
 export const conspiraseaIndex = writable(0)
 
 export const currentConspirasea = writableDerived(
