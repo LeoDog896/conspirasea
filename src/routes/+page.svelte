@@ -5,7 +5,7 @@
 	import { currentConspirasea } from '$lib/elements';
 	import Canvas from '$lib/Canvas.svelte';
 
-	let canvas: typeof Canvas;
+	let canvas: Canvas;
 
 	function addElement(event: MouseEvent) {
 		$currentConspirasea.elements = [
@@ -23,6 +23,7 @@
 	}
 </script>
 
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
 	id="container"
 	class="fixed top-0 left-0 h-full w-screen bg-gray-300"
@@ -61,18 +62,18 @@
 				axis: 'both',
 				bounds: '#container',
 				position: element.position,
-				defaultClassDragging: 'box-dragging'
+				defaultClassDragging: 'box-dragging',
+				onDrag(event) {
+					const { offsetX, offsetY } = event;
+					element.position.x = offsetX;
+					element.position.y = offsetY;
+				},
+				onDragEnd() {
+					tick().then(() => {
+						element.selected = false;
+					})
+				}
 			}}
-			on:neodrag={(event) => {
-				if (!event || !event.detail) return;
-				const { offsetX, offsetY } = event.detail;
-				element.position.x = offsetX;
-				element.position.y = offsetY;
-			}}
-			on:neodrag:end={() =>
-				tick().then(() => {
-					element.selected = false;
-				})}
 			class="transition-shadow fixed max-w-md z-0 p-6 shadow-lg rounded-md
       {element.selected ? 'bg-gray-200' : 'bg-white'} dark:bg-black"
 		>

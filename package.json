@@ -12,7 +12,7 @@
 		"format": "prettier --ignore-path .gitignore --write --plugin-search-dir=. ."
 	},
 	"devDependencies": {
-		"@neodrag/svelte": "^1.1.4",
+		"@neodrag/svelte": "^2.0.1",
 		"@playwright/test": "^1.21.0",
 		"@sveltejs/adapter-auto": "next",
 		"@sveltejs/adapter-static": "^1.0.0-next.29",
