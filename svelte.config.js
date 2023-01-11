@@ -13,12 +13,9 @@ const config = {
 
 	kit: {
 		adapter: adapter(),
-    paths: {
-      base: "/conspirasea"
-    },
-    prerender: {
-      default: true
-    }
+		paths: {
+			base: '/conspirasea'
+		}
 	}
 };
 
