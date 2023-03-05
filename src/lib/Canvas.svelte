@@ -1,20 +1,13 @@
 <script lang="ts">
-	import { tick, onMount } from 'svelte';
-	import { currentConspirasea, conspiraseas } from '$lib/elements';
+	import { currentConspirasea } from '$lib/elements';
+	import { onMount } from 'svelte';
+	import { Canvas, Layer, type Render } from "svelte-canvas"
 
 	let width: number;
 	let height: number;
-	let canvas: HTMLCanvasElement | null = null;
 
-	onMount(() => {
-		width = window.innerWidth;
-		height = window.innerHeight;
-	});
-
-	export function draw() {
-		if (!canvas || !canvas.getContext('2d')) return;
-
-		const context = canvas.getContext('2d')!;
+	let render: Render;
+	$: render = ({ context, width, height }) => {
 		context.clearRect(0, 0, width, height);
 		$currentConspirasea.elements.forEach((it) =>
 			it.connections.forEach((connection) => {
@@ -44,23 +37,18 @@
 		);
 	}
 
-	$: if (
-		width &&
-		height &&
-		$conspiraseas &&
-		$currentConspirasea.elements.length > 0 &&
-		canvas &&
-		canvas.getContext('2d')
-	) {
-		draw();
-	}
+	onMount(() => {
+		width = window.innerWidth;
+		height = window.innerHeight;
+	});
 </script>
 
-<canvas class="fixed top-0 left-0 pointer-events-none" bind:this={canvas} {width} {height} />
+<Canvas class="fixed top-0 left-0 pointer-events-none" {width} {height}>
+	<Layer {render}></Layer>
+</Canvas>
 <svelte:window
 	on:resize={() => {
 		width = window.innerWidth;
 		height = window.innerHeight;
-		tick().then(draw);
 	}}
 />
